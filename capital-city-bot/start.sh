@@ -2,28 +2,26 @@
 set -e
 
 cd /app
-export PYTHONPATH=/app/backend:$PYTHONPATH
+export PYTHONPATH=/app/backend:${PYTHONPATH:-}
+export PYTHONUNBUFFERED=1
 
-echo "==> Starting Capital City on port ${PORT:-8000}"
+PORT="${PORT:-8000}"
+echo "==> Capital City starting on port $PORT"
+echo "==> WEBAPP_URL=${WEBAPP_URL:-not set}"
+if [ -n "$BOT_TOKEN" ]; then
+  echo "==> BOT_TOKEN is set: yes"
+else
+  echo "==> BOT_TOKEN is set: NO"
+fi
 
-# FastAPI (Mini App + API)
+# Telegram-бот в фоне (если упадёт — веб продолжит работать)
+(
+  sleep 2
+  echo "==> Starting Telegram bot..."
+  python bot/main.py
+) &
+
+# FastAPI — главный процесс (Railway смотрит на него)
+echo "==> Starting FastAPI..."
 cd /app/backend
-uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} &
-BACKEND_PID=$!
-
-sleep 3
-
-# Telegram bot
-cd /app
-python bot/main.py &
-BOT_PID=$!
-
-echo "==> Backend PID=$BACKEND_PID  Bot PID=$BOT_PID"
-
-# Ждём, пока один из процессов не завершится
-wait -n $BACKEND_PID $BOT_PID
-EXIT_CODE=$?
-
-echo "==> Process exited with $EXIT_CODE, shutting down..."
-kill $BACKEND_PID $BOT_PID 2>/dev/null || true
-exit $EXIT_CODE
+exec uvicorn main:app --host 0.0.0.0 --port "$PORT"
