@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Город Капитала</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="profile-card">
+                <div class="avatar" id="avatar">👤</div>
+                <div class="profile-info">
+                    <div class="name" id="user-name">Загрузка...</div>
+                    <div class="level-line">
+                        <span class="level" id="user-level">Ур. 1</span>
+                        <div class="exp-bar"><div class="exp-fill" id="exp-fill"></div></div>
+                    </div>
+                </div>
+                <div class="balance-block">
+                    <div class="balance" id="balance">0 💰</div>
+                    <div class="energy" id="energy">⚡ 100/100</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <button class="nav-btn active" data-tab="home">🏠 Главная</button>
+            <button class="nav-btn" data-tab="jobs">💼 Работы</button>
+            <button class="nav-btn" data-tab="property">🏡 Имущество</button>
+            <button class="nav-btn" data-tab="casino">🎰 Казино</button>
+            <button class="nav-btn" data-tab="top">🏆 Топ</button>
+        </nav>
+
+        <!-- Content -->
+        <main class="content">
+            <!-- HOME -->
+            <section id="tab-home" class="tab active">
+                <div class="welcome-card">
+                    <h2>Добро пожаловать в Город Капитала</h2>
+                    <p>Зарабатывай, покупай, играй и становись самым влиятельным.</p>
+                </div>
+
+                <div class="quick-actions">
+                    <button class="action-btn" onclick="switchTab('jobs')">
+                        <span class="icon">💼</span>
+                        <span>Работать</span>
+                    </button>
+                    <button class="action-btn" onclick="switchTab('property')">
+                        <span class="icon">🏠</span>
+                        <span>Имущество</span>
+                    </button>
+                    <button class="action-btn" onclick="switchTab('casino')">
+                        <span class="icon">🎰</span>
+                        <span>Казино</span>
+                    </button>
+                    <button class="action-btn" onclick="collectIncome()">
+                        <span class="icon">💵</span>
+                        <span>Собрать доход</span>
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-influence">0</div>
+                        <div class="stat-label">Влияние</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-reputation">0</div>
+                        <div class="stat-label">Репутация</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-property">0 💰</div>
+                        <div class="stat-label">Имущество</div>
+                    </div>
+                </div>
+
+                <div class="section-title">Последние события города</div>
+                <div class="events" id="events">
+                    <div class="event">🏙️ Город просыпается... Начни зарабатывать!</div>
+                </div>
+            </section>
+
+            <!-- JOBS -->
+            <section id="tab-jobs" class="tab">
+                <div class="section-title">Доступные работы</div>
+                <div id="jobs-list" class="cards-list">
+                    <div class="loading">Загрузка работ...</div>
+                </div>
+            </section>
+
+            <!-- PROPERTY -->
+            <section id="tab-property" class="tab">
+                <div class="property-tabs">
+                    <button class="prop-tab active" data-prop="shop">🛒 Магазин</button>
+                    <button class="prop-tab" data-prop="my">📦 Моё</button>
+                </div>
+                <div id="property-shop" class="cards-list"></div>
+                <div id="property-my" class="cards-list" style="display:none"></div>
+            </section>
+
+            <!-- CASINO -->
+            <section id="tab-casino" class="tab">
+                <div class="casino-header">
+                    <h2>🎰 Казино «Неон»</h2>
+                    <p>Испытай удачу. Минимальная ставка — 10 💰</p>
+                </div>
+
+                <div class="bet-control">
+                    <button onclick="changeBet(-50)">−</button>
+                    <input type="number" id="bet-amount" value="100" min="10" max="50000">
+                    <button onclick="changeBet(50)">+</button>
+                </div>
+
+                <div class="casino-games">
+                    <div class="game-card" onclick="playCasino('slots')">
+                        <div class="game-icon">🍒🍋7️⃣</div>
+                        <div class="game-name">Слоты</div>
+                        <div class="game-desc">x6 / x12 / x25</div>
+                    </div>
+                    <div class="game-card" onclick="playCasino('roulette')">
+                        <div class="game-icon">🔴⚫</div>
+                        <div class="game-name">Рулетка</div>
+                        <div class="game-desc">x2 на цвет</div>
+                    </div>
+                    <div class="game-card" onclick="playCasino('dice')">
+                        <div class="game-icon">🎲</div>
+                        <div class="game-name">Кости</div>
+                        <div class="game-desc">x2.1</div>
+                    </div>
+                </div>
+
+                <div id="casino-result" class="casino-result"></div>
+            </section>
+
+            <!-- TOP -->
+            <section id="tab-top" class="tab">
+                <div class="section-title">🏆 Топ по капиталу</div>
+                <div id="top-list" class="top-list">
+                    <div class="loading">Загрузка топа...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
